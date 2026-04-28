@@ -15,12 +15,15 @@
 // I recommend first playing with https://jsfiddle.net to get a little more comfortable with JavaScript
 //   create json inputs for plays and invoice, e.g.
 // let plays = require("./plays.json") // alternative to reading the .json file is to assign the value in this file 
-let plays = 
-{
-  "hamlet": {"name": "Hamlet", "type": "tragedy"},
-  "as-like": {"name": "As You Like It", "type": "comedy"},  // make sure the as-like key has the hyphen
-  "othello": {"name": "Othello", "type": "tragedy"}
-}
+
+// let plays = 
+// {
+//   "hamlet": {"name": "Hamlet", "type": "tragedy"},
+//   "as-like": {"name": "As You Like It", "type": "comedy"},  // make sure the as-like key has the hyphen
+//   "othello": {"name": "Othello", "type": "tragedy"}
+// }
+
+let plays = require("./plays.json");
 
 
 //   before unit testing, e.g. with statement.test.js, create plays.json, and a couple sample invoice inputs, e.g. 
@@ -49,24 +52,26 @@ let plays =
 /* function from Refactor Text */
 // create invoice  - need to remove the first square brackets from invoice or change the code the access the first element of invoice
 // let invoice = require("./invoice.json") // alternative to reading the .json file is to assign the value in this file
-let invoice = 
-{
-    customer: "BigCo",
-    performances: [
-        {
-            playID: "hamlet",
-            audience: 55
-        },
-        {
-            playID: "as-like",
-            audience: 35
-        },
-        {
-            playID: "othello",
-            audience: 40
-        }
-   ]
-}
+// let invoice = 
+// {
+//     customer: "BigCo",
+//     performances: [
+//         {
+//             playID: "hamlet",
+//             audience: 55
+//         },
+//         {
+//             playID: "as-like",
+//             audience: 35
+//         },
+//         {
+//             playID: "othello",
+//             audience: 40
+//         }
+//    ]
+// }
+
+let invoice = require("./invoices.json");
 
 function statement(invoice, plays) {
     let totalAmount = 0;
@@ -79,24 +84,7 @@ function statement(invoice, plays) {
     }).format;
     for (let perf of invoice.performances) {
       const play = plays[perf.playID];
-      let thisAmount = 0;
-      switch (play.type) {
-        case 'tragedy':
-          thisAmount = 40000;
-          if (perf.audience > 30) {
-            thisAmount += 1000 * (perf.audience - 30);
-          }
-          break;
-        case 'comedy':
-          thisAmount = 30000;
-          if (perf.audience > 20) {
-            thisAmount += 10000 + 500 * (perf.audience - 20);
-          }
-          thisAmount += 300 * perf.audience;
-          break;
-        default:
-          throw new Error(`unknown type: ${play.type}`);
-      }
+      let thisAmount = amountForPlay(play, perf);
       // add volume credits
       volumeCredits += Math.max(perf.audience - 30, 0);
       // add extra credit for every ten comedy attendees
@@ -110,13 +98,35 @@ function statement(invoice, plays) {
     result += `Amount owed is ${format(totalAmount / 100)}\n`;
     result += `You earned ${volumeCredits} credits\n`;
     return result;
-  }
+}
   
 
 // you can either run the statement function directly from this file 
 let stmt = statement(invoice, plays)
 console.log(stmt)
 
+
+function amountForPlay(play, perf) {
+    let thisAmount = 0;
+    switch (play.type) {
+        case 'tragedy':
+            thisAmount = 40000;
+            if (perf.audience > 30) {
+                thisAmount += 1000 * (perf.audience - 30);
+            }
+            break;
+        case 'comedy':
+            thisAmount = 30000;
+            if (perf.audience > 20) {
+                thisAmount += 10000 + 500 * (perf.audience - 20);
+            }
+            thisAmount += 300 * perf.audience;
+            break;
+        default:
+            throw new Error(`unknown type: ${play.type}`);
+    }
+    return thisAmount;
+}
 // or export it  
 // module.exports = statement
 // run it in another file
